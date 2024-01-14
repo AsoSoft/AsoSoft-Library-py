@@ -7,6 +7,18 @@ AsoSoft Library is originally written in C# and this library is the Python port.
 - **Sort**: Sorts a list in correct Kurdish alphabet order.
 - **Poem Meter Classifier**: Classifies the meter of the input Kurdish poem 
 
+## How to use?
+- **Python version**: Python 3.11+ 
+- **Install package using pip**: [pip install asosoft](https://pypi.org/project/asosoft/)
+- **Import package in your py file**: 
+```python
+import asosoft
+```
+
+## Development
+AsoSoft Library is developed and maintained by Aso Mahmudi.
+AsoSoft Library is written in C# (.NET 6).
+
 ## Grapheme-to-Phoneme (G2P) converter and Transliteration
 This function is based on the study "[Automated Grapheme-to-Phoneme Conversion for Central Kurdish based on Optimality Theory](https://www.sciencedirect.com/science/article/abs/pii/S0885230821000292)". 
 
@@ -198,11 +210,3 @@ You can find Kurdish poems in https://books.vejin.net/.
 >>> print("Poem Type= " + classified.overalMeterType)
 >>> print("Poem Meter= " + classified.overalPattern)
 ```
-
-## How to use?
-Install [AsoSoft Library package](https://www.nuget.org/packages/AsoSoftLibrary) via NuGet Gallery.
-Then, insert `using AsoSoftLibrary;` into "Usings" of your codes.
-
-## Development
-AsoSoft Library is developed and maintained by Aso Mahmudi.
-AsoSoft Library is written in C# (.NET 6).
