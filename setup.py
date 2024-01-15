@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup 
+from setuptools import find_packages, setup
 import os
 
 with open(os.path.join(os.path.dirname(__file__),'README.md'), "r", encoding = "utf-8") as f:
@@ -28,5 +28,5 @@ setup(
     extras_require={
         "dev": ["pytest>=7.0", "twine>=4.0.2"],
     },
-    python_requires=">=3.11"
+    python_requires=">=3.8"
 )
