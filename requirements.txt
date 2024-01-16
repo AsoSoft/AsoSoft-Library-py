@@ -1,0 +1,4 @@
+regex >= 2023.0.0
+# Development dependencies (optional)
+pytest >= 7.0
+twine >= 4.0.2
