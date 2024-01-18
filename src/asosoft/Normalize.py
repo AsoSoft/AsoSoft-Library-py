@@ -15,22 +15,22 @@
 import regex as re
 import html
 
-def _replaceByList(text, replaceList):
-    for i in range(0, len(replaceList), 2):
-        text = re.sub(replaceList[i], replaceList[i + 1], text)
+def replace_by_list(text, replace_list):
+    for pattern, replacement in replace_list:
+        text = re.sub(pattern, replacement, text)
     return text
 
-_Ku = "ئابپتجچحخدرڕزژسشعغفڤقکگلڵمنوۆەهھیێأإآثذصضطظكيىةڎۊؤ" + "\u064B-\u065F"
-_joiners = "ئبپتثجچحخسشصضطظعغفڤقکكگلڵمنیيهھێ"
+KU = "ئابپتجچحخدرڕزژسشعغفڤقکگلڵمنوۆەهھیێأإآثذصضطظكيىةڎۊؤ" + "\u064B-\u065F"
+JOINERS = "ئبپتثجچحخسشصضطظعغفڤقکكگلڵمنیيهھێ"
 
-_normalizationReplaces = {
+normalization_replaces = {
     "NormalizeKurdish1": [
         #========= Tatweels (U+0640)
         "\u0640{2,}", "\u0640", # merge
-        rf"(?<=[{_joiners}])\u0640(?=[{_Ku}])", "", # delete unnecessary tatweel e.g. هـا to ها
+        rf"(?<=[{JOINERS}])\u0640(?=[{KU}])", "", # delete unnecessary tatweel e.g. هـا to ها
         # replace tatweel nonadjacent to Kurdish letters with dash
-        rf"(?<=[{_joiners}])\u0640", "\uF640", # temporal preserve
-        rf"\u0640(?=[{_Ku}])", "\uF640", # temporal preserve
+        rf"(?<=[{JOINERS}])\u0640", "\uF640", # temporal preserve
+        rf"\u0640(?=[{KU}])", "\uF640", # temporal preserve
         "\u0640", "-",
         "\uF640", "\u0640",
 
@@ -38,18 +38,18 @@ _normalizationReplaces = {
         "[\uFEFF\u200C]+", "\u200C", #Standardize and remove dublicated ZWNJ
         # remove unnecessary ZWNJ
         r"‌(?=(\s|\p{P}|$))", "",    # ZWNJ + white spaces
-        rf"(?<![{_joiners}])\u200C", "", # rmove after non-joiner letter: سەرzwnjزل                    
+        rf"(?<![{JOINERS}])\u200C", "", # rmove after non-joiner letter: سەرzwnjزل
 
         #========= Zero-Width Joiner (U+200D)
         "\u200D{2,}", "\u200D", # merge
-        "ه" + "\u200D", "هـ",   # final Heh, e.g. ماه‍  => ماهـ 
-        f"(?<![{_joiners}])\u200D(?![{_joiners}])", "", #remove unnecessary ZW-J
+        "ه" + "\u200D", "هـ",   # final Heh, e.g. ماه‍  => ماهـ
+        f"(?<![{JOINERS}])\u200D(?![{JOINERS}])", "", #remove unnecessary ZW-J
     ],
     "NormalizeKurdish2": [
-        #========= standard H, E, Y, K				    
+        #========= standard H, E, Y, K
         "ه" + "\u200C", "ە",    # Heh+ZWNJ =>  kurdish AE
-        "ه" + f"(?=([^{_Ku}ـ]|$))", "ە",   #final Heh looks like Ae
-        "ھ" + f"(?=([^{_Ku}]|$))", "هـ",   # final Heh Doachashmee
+        "ه" + f"(?=([^{KU}ـ]|$))", "ە",   #final Heh looks like Ae
+        "ھ" + f"(?=([^{KU}]|$))", "هـ",   # final Heh Doachashmee
         "ھ" , "ه",  # non-final Heh Doachashmee
         "ى|ي", "ی",  # Alef maksura | Arabic Ye => Farsi ye
         "ك", "ک",  # Arabic Kaf => Farsi Ke
@@ -63,8 +63,8 @@ _normalizationReplaces = {
         "(ر|ڕ)" + "\u0650+", "ڕ", #KASRA
     ],
     "NormalizeKurdish3": [
-            f"(?<![{_Ku}])" + "ر" + f"(?=[{_Ku}])", "ڕ", # initial R
-            f"(?<![{_Ku}])" + "وو" + "(?=[ئبپتجچحخدرڕزژسشعغفڤقکگلڵمنهھی])", "و", # inintial WU
+            f"(?<![{KU}])" + "ر" + f"(?=[{KU}])", "ڕ", # initial R
+            f"(?<![{KU}])" + "وو" + "(?=[ئبپتجچحخدرڕزژسشعغفڤقکگلڵمنهھی])", "و", # inintial WU
     ],
     "AliK2Unicode": [
             "لاَ|لآ|لاً", "ڵا",
@@ -160,7 +160,7 @@ _normalizationReplaces = {
 
 
 # ================= Normalization =================
-def _LoadNormalizerReplaces(file):
+def load_normalizer_replaces(file):
     output = {}
 
     items = file.strip().split('\n')
@@ -173,8 +173,8 @@ def _LoadNormalizerReplaces(file):
 
     return output
 
-_DeepReplacements = _LoadNormalizerReplaces("resources/NormalizeUnicodeDeep.csv")
-_additionalReplacements = _LoadNormalizerReplaces("resources/NormalizeUnicodeAdditional.csv")
+deep_replacements = load_normalizer_replaces("resources/NormalizeUnicodeDeep.csv")
+additional_replacements = load_normalizer_replaces("resources/NormalizeUnicodeAdditional.csv")
 
 # Unicode Normalization for Central Kurdish
 def Normalize(text, isOnlyKurdish=True, changeInitialR=True, deepUnicodeCorrectios=True, additionalUnicodeCorrections=True, usersReplaceList=None):
@@ -182,17 +182,17 @@ def Normalize(text, isOnlyKurdish=True, changeInitialR=True, deepUnicodeCorrecti
         usersReplaceList = {}
 
     replaces = {}
-    
+
     # Character-based replacement (ReplaceList and Private Use Area)
     char_list = list(set(text))
 
     if deepUnicodeCorrectios:
-        for item in _DeepReplacements:
+        for item in deep_replacements:
             if item[0] in char_list:
                 replaces[item[0]] = item[1]
 
     if additionalUnicodeCorrections:
-        for item in _additionalReplacements:
+        for item in additional_replacements:
             if item[0] in char_list and item[0] not in replaces:
                 replaces[item[0]] = item[1]
 
@@ -206,31 +206,31 @@ def Normalize(text, isOnlyKurdish=True, changeInitialR=True, deepUnicodeCorrecti
         elif 57343 < ord(ch) < 63744:  # Private Use Area
             text = text.replace(ch, '□')  # u25A1 White Square
 
-    text = _replaceByList(text, _normalizationReplaces["NormalizeKurdish1"])
+    text = _replaceByList(text, normalization_replaces["NormalizeKurdish1"])
 
     # if the text is Monolingual (only Central Kurdish)
     if isOnlyKurdish:
-        text = _replaceByList(text, _normalizationReplaces["NormalizeKurdish2"])
-        
+        text = _replaceByList(text, normalization_replaces["NormalizeKurdish2"])
+
         # Initial r
         if changeInitialR:
-            text = _replaceByList(text, _normalizationReplaces["NormalizeKurdish3"])
+            text = _replaceByList(text, normalization_replaces["NormalizeKurdish3"])
 
     return text
 
 
 # Seperate digits from words (e.g. replacing "12a" with "12 a")
 def SeperateDigits(text):
-    return _replaceByList(text, _normalizationReplaces["SeperateDigits"])
+    return _replaceByList(text, normalization_replaces["SeperateDigits"])
 
 # Normalize Punctuations
 def NormalizePunctuations(text, seprateAllPunctuations):
     text = text.replace('"', "\uF8FD")  # temp replacement
-    text = _replaceByList(text, _normalizationReplaces["NormalizePunctuations1"])
+    text = _replaceByList(text, normalization_replaces["NormalizePunctuations1"])
     if not seprateAllPunctuations:
-        text = _replaceByList(text, _normalizationReplaces["NormalizePunctuations2"])
+        text = _replaceByList(text, normalization_replaces["NormalizePunctuations2"])
     else:
-        text = _replaceByList(text, _normalizationReplaces["NormalizePunctuations3"])
+        text = _replaceByList(text, normalization_replaces["NormalizePunctuations3"])
     text = text.replace("\uF8FD", '"')  # undo temp replacement
     return text
 
@@ -286,16 +286,16 @@ def UnifyNumerals(text, NumeralType):
 # ================= Converting Non-Standard Fonts  =================
 # Converts Kurdish text written in AliK fonts into Unicode standard
 def AliK2Unicode(text):
-    return _replaceByList(text, _normalizationReplaces["AliK2Unicode"])
+    return _replaceByList(text, normalization_replaces["AliK2Unicode"])
 
 # Converts Kurdish text written in AliWeb fonts into Unicode standard
 def AliWeb2Unicode(text):
-    return _replaceByList(text, _normalizationReplaces["AliWeb2Unicode"])
+    return _replaceByList(text, normalization_replaces["AliWeb2Unicode"])
 
 # Converts Kurdish text written in KDylan fonts into Unicode standard
 def Dylan2Unicode(text):
-    return _replaceByList(text, _normalizationReplaces["Dylan2Unicode"])
+    return _replaceByList(text, normalization_replaces["Dylan2Unicode"])
 
 # Converts Kurdish text written in Zarnegar fonts into Unicode standard
 def Zarnegar2Unicode(text):
-    return _replaceByList(text, _normalizationReplaces["Zarnegar2Unicode"])
+    return _replaceByList(text, normalization_replaces["Zarnegar2Unicode"])
