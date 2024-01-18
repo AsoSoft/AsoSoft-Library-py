@@ -42,4 +42,4 @@
 و(?=[aeêo]),w,before vowel
 (?<=[aeêo])ی,y,after vowel
 ی(?=[aeêo]),y,before vowel
-^([bçdjl])$,$1i,چ=>çi bcçdfghḧjklłmnpqrřsştvwxẍyzʔƹ
+^([bçdjl])$,\1i,چ=>çi bcçdfghḧjklłmnpqrřsştvwxẍyzʔƹ

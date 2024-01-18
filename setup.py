@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__),'README.md'), "r", encoding = "
 
 setup(
     name="asosoft",
-    version="0.1.0",
+    version="0.1.2",
     description="AsoSoft's Library for Kurdish language processing tasks",
     keywords='natural-language-processing, normalization, unicode-normalization, central-kurdish, kurdish, sorani',
     package_dir={'': 'src'},
@@ -21,7 +21,7 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.8",
         "Operating System :: OS Independent",
     ],
     install_requires=["regex >= 2023.0.0"],
