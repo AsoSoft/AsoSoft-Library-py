@@ -1,5 +1,5 @@
 def kurdish_sort(inputList):
-    ku = list(["ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ"])
+    ku = list("ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ")
     return CustomSort(inputList, ku)
 
 def CustomSort(inputList, inputOrder):

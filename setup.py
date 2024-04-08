@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__),'README.md'), "r", encoding = "
 
 setup(
     name="asosoft",
-    version="0.1.2",
+    version="0.1.3",
     description="AsoSoft's Library for Kurdish language processing tasks",
     keywords='natural-language-processing, normalization, unicode-normalization, central-kurdish, kurdish, sorani',
     package_dir={'': 'src'},
