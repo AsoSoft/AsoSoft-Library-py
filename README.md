@@ -1,23 +1,20 @@
 # AsoSoft Library (Python)
-AsoSoft Library offers basic natural language processing (NLP) algorithms for the Kurdish Language (ckb: Central branch of Kurdish).
-AsoSoft Library is originally written in C# and this library is the Python port.
-- **Grapheme-to-Phoneme (G2P) converter and Transliteration**: converts Kurdish text into syllabified phoneme string. Also transliterates Kurdish texts from Arabic script into Latin script and vice versa.
+AsoSoft Library offers the following natural language processing (NLP) algorithms for the Kurdish Language (ckb: Central branch of Kurdish):
+- **Grapheme-to-Phoneme (G2P) converter and Transliterator**: converts Kurdish text into syllabified phoneme string. Also transliterates Kurdish texts from Arabic script into Latin script and vice versa.
 - **Normalizer**: normalizes the Kurdish text and punctuation marks, unifies numerals, replaces Html Entities, extracts and replaces URLs and emails, and more.
 - **Numeral Converter**: converts any type of numbers into Kurdish words.
 - **Sort**: Sorts a list in correct Kurdish alphabet order.
-- **Poem Meter Classifier**: Classifies the meter of the input Kurdish poem 
+- **Poem Meter Classifier**: Classifies the meter of the input Kurdish poem
+
+AsoSoft Library is originally written in C# by [Aso Mahmudi](https://github.com/aso-mehmudi) and this library is its Python port.
 
 ## How to use?
-- **Python version**: Python 3.11+ 
-- **Install package using pip**: [pip install asosoft](https://pypi.org/project/asosoft/)
-- **Import package in your py file**: 
+- **Requierements**: Python 3.8+
+- **Install the package using pip**: [pip install asosoft](https://pypi.org/project/asosoft/)
+- **Import the package in your Python file**: 
 ```python
 import asosoft
 ```
-
-## Development
-AsoSoft Library is developed and maintained by Aso Mahmudi.
-AsoSoft Library is written in C# (.NET 6).
 
 ## Grapheme-to-Phoneme (G2P) converter and Transliteration
 This function is based on the study "[Automated Grapheme-to-Phoneme Conversion for Central Kurdish based on Optimality Theory](https://www.sciencedirect.com/science/article/abs/pii/S0885230821000292)". 
@@ -196,16 +193,16 @@ Sorting a string list in correct order of Kurdish alphabet ("ئءاآأإبپت�
 ```
 or using your custom order:
 ```python
->>> inputList = ["یەک", "ڕەنگ", "ئەو", "ئاو", "ڤەژین", "فڵان"]
->>> inputOrder = list("ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ")
->>> print(asosoft.CustomSort(inputList, inputOrder))
+>>> input_list = ["یەک", "ڕەنگ", "ئەو", "ئاو", "ڤەژین", "فڵان"]
+>>> input_order = list("ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ")
+>>> print(asosoft.CustomSort(input_list, input_order))
 ["ئاو", "ئەو", "ڕەنگ", "فڵان", "ڤەژین", "یەک"]
 ```
 ## Poem Meter Classifier
 It classifies the meter of the input Kurdish poem typed in Arabic script. The lines of the poem should be seprated by new line char ('\n').
 You can find Kurdish poems in https://books.vejin.net/.
 ```python
->>> poem = "گەرچی تووشی ڕەنجەڕۆیی و حەسرەت و دەردم ئەمن\nقەت لەدەس ئەم چەرخە سپڵە نابەزم مەردم ئەمن\nئاشقی چاوی کەژاڵ و گەردنی پڕ \nخاڵ نیم\nئاشقی کێو و تەلان و بەندەن و بەردم ئەمن"
+>>> poem = f"گەرچی تووشی ڕەنجەڕۆیی و حەسرەت و دەردم ئەمن\nقەت لەدەس ئەم چەرخە سپڵە نابەزم مەردم ئەمن\nمن لە زنجیر و تەناف و دار و بەند باکم نییە\nلەت لەتم کەن، بمکوژن، هێشتا دەڵێم کوردم ئەمن"
 >>> classified = asosoft.ClassifyKurdishPoem(poem)
 >>> print("Poem Type= " + classified.overalMeterType)
 Quantitative/عەرووزی
