@@ -24,7 +24,7 @@ from .Number2Word import Number2Word
 from collections import OrderedDict
 
 # Normalizion
-def _G2PNormalize(text):
+def G2P_normalize(text):
     s = [
         "  +", " " ,
         "دٚ", "ڎ",
@@ -54,37 +54,37 @@ def _G2PNormalize(text):
         text = re.sub(s[i], s[i + 1], text)
     return text
 
-_History = {}
-_path = os.path.dirname(__file__)
-_G2PExceptions = {}
-_G2PCertain = {}
-def _load_replaces():
-    with open(os.path.join(_path, "resources/G2PExceptions.csv"), 'r', encoding="utf-8", newline='\n') as csvfile:
+history = {}
+path = os.path.dirname(__file__)
+G2P_exceptions = {}
+G2P_certain = {}
+def load_replaces():
+    with open(os.path.join(path, "resources/G2PExceptions.csv"), 'r', encoding="utf-8", newline='\n') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # Skip the first row
         for row in reader:
-            _G2PExceptions[row[0]] = row[1]
+            G2P_exceptions[row[0]] = row[1]
             
-    with open(os.path.join(_path, "resources/G2PCertain.csv"), 'r', encoding="utf-8", newline='\n') as csvfile:
+    with open(os.path.join(path, "resources/G2PCertain.csv"), 'r', encoding="utf-8", newline='\n') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # Skip the first row
         for row in reader:
-            _G2PCertain[row[0]] = row[1]
+            G2P_certain[row[0]] = row[1]
 
 
 # GEN: generates all possible candidates:
 # e.g.  بوون => bûn, buwn, bwun
 
-def _Generator(gr):
-    if len(_G2PExceptions) == 0:
-        _load_replaces()
+def Generator(gr):
+    if len(G2P_exceptions) == 0:
+        load_replaces()
 
     # Converting exceptional words
-    for key, value in _G2PExceptions.items():
+    for key, value in G2P_exceptions.items():
         gr = re.sub(key, value, gr)
 
     # Converting certain characters
-    for key, value in _G2PCertain.items():
+    for key, value in G2P_certain.items():
         gr = re.sub(key, value, gr)
 
     # Uncertainty in "و" and "ی"
@@ -132,10 +132,10 @@ def _Generator(gr):
                     CandList1.append(TempList[i] + temp[j])
 
     # Adding "i" between Consonant Clusters
-    Candidates = _iInsertion(CandList1)
+    Candidates = i_insertion(CandList1)
 
     # ======= Syllabification for each candidate
-    OutputCandidates = _Syllabification(Candidates)
+    OutputCandidates = syllabification(Candidates)
 
     # for speed up: remove candidates that has 1) syllable without vowel or 2) more than 3 consonants in coda
     cCount = len(OutputCandidates)
@@ -150,7 +150,7 @@ def _Generator(gr):
 
 # insertion of hidden /i/ vowel
 # e.g. brd => bird, brid, birid
-def _iInsertion(Cands):
+def i_insertion(Cands):
     Candidates = []
     for i in range(len(Cands)):
         ThisCand = []
@@ -171,7 +171,7 @@ def _iInsertion(Cands):
 
 # Syllabification of candidates
 # e.g. dexom => ˈdeˈxom
-def _Syllabification(Candidates):
+def syllabification(Candidates):
     cCount = len(Candidates)
     for i in range(cCount):
         # Onset C(C)V
@@ -184,7 +184,7 @@ def _Syllabification(Candidates):
     return Candidates
 
 # Sonority Sequencing Principle in EVAL needs phoneme ranking 
-def _SonorityIndex(ch):
+def sonority_index(ch):
     c = str(ch)
     if re.search(r"[wy]", c):  # Approximant
         return 6
@@ -201,7 +201,7 @@ def _SonorityIndex(ch):
 
      
 # EVAL: specifies a penalty number for each syllabified candidate
-def _EVAL(Candidates):
+def EVAL(Candidates):
     output = {}
     if len(Candidates) > 0:
         Penalty = {}
@@ -222,7 +222,7 @@ def _EVAL(Candidates):
             for coda in codas:
                 chars = coda
                 for j in range(len(chars) - 1):
-                    if _SonorityIndex(chars[j]) <= _SonorityIndex(chars[j + 1]):
+                    if sonority_index(chars[j]) <= sonority_index(chars[j + 1]):
                         P += 10
             # DEP: i insertion
             P += candidate.count("i") * 2
@@ -248,6 +248,7 @@ def _EVAL(Candidates):
             P += candidate.count("wi") * 2
             P += candidate.count("iw") * 2
             P += candidate.count("wû") * 5
+            P += candidate.count("uˈwî") * 1
 
             # ˈdiˈrêˈjayˈyî => ˈdiˈrêˈjaˈyîy  (not heyyî and teyyî)
             # ˈdiˈrêjˈyî => ˈdiˈrêˈjîy
@@ -286,25 +287,25 @@ def _EVAL(Candidates):
             pat = re.search(r"([^aeêouûiîˈ])ˈ([^aeêouûiîˈ])i([^aeêouûiîˈ])", candidate)
             if pat:
                 C = re.sub("[iˈ]", "", pat.group())
-                if _SonorityIndex(C[1]) > _SonorityIndex(C[2]):
+                if sonority_index(C[1]) > sonority_index(C[2]):
                     P += 3
             # ('sern'cê => 'se'rin'cê) 
             pat = re.search(r"([^aeêouûiîˈ])([^aeêouûiîˈ])ˈ([^aeêouûiîˈ])", candidate)
             if pat:
                 C = re.sub("[iˈ]", "", pat.group())
-                if _SonorityIndex(C[0]) > _SonorityIndex(C[1]):
+                if sonority_index(C[0]) > sonority_index(C[1]):
                     P += 3
             # ('ser'ni'cê => 'se'rin'cê) 
             pat = re.search(r"([^aeêouûiîˈ])ˈ([^aeêouûiîˈ])iˈ([^aeêouûiîˈ])", candidate)
             if pat:
                 C = re.sub("[iˈ]", "", pat.group())
-                if _SonorityIndex(C[0]) > _SonorityIndex(C[1]) and _SonorityIndex(C[1]) > _SonorityIndex(C[2]):
+                if sonority_index(C[0]) > sonority_index(C[1]) and sonority_index(C[1]) > sonority_index(C[2]):
                     P += 3
             # ('gi'rit'nê => 'gir'ti'nê)  ('ku'şit'ne => 'kuş'ti'ne)
             pat = re.search(r"[aeêouûiî]ˈ([^aeêouûiîˈ])i([^aeêouûiîˈ])ˈ([^aeêouûiîˈ])", candidate)
             if pat:
                 C = re.sub("[aeêouûiîˈ]", "", pat.group())
-                if _SonorityIndex(C[2]) >= _SonorityIndex(C[1]):
+                if sonority_index(C[2]) >= sonority_index(C[1]):
                     P += 3
             Penalty[candidate] = P
 
@@ -312,9 +313,9 @@ def _EVAL(Candidates):
     return output
 
 # chooses the best candidates for the word
-def _Evaluator(gr, Candidates):
+def evaluator(gr, Candidates):
     Output = []
-    evaluatedCandidates = _EVAL(Candidates) 
+    evaluatedCandidates = EVAL(Candidates) 
     if len(evaluatedCandidates) > 0:
         LowestPenalt = list(evaluatedCandidates.values())[0]
         for key, value in evaluatedCandidates.items():
@@ -322,11 +323,11 @@ def _Evaluator(gr, Candidates):
                 Output.append(key)
     return gr if len(Output) == 0 else '¶'.join(Output)
    
-def _WordG2P(gr, SingleOutputPerWord):
+def word_G2P(gr, SingleOutputPerWord):
     # Check history for speed up
-    if gr not in _History:
-        _History[gr] = _Evaluator(gr, _Generator(gr))
-    return _History[gr].split('¶')[0] if SingleOutputPerWord else _History[gr]
+    if gr not in history:
+        history[gr] = evaluator(gr, Generator(gr))
+    return history[gr].split('¶')[0] if SingleOutputPerWord else history[gr]
 
 # Converts Central Kurdish text in standard Arabic script into syllabified phonemic Latin script (i.e. graphemes to phonems)
 def KurdishG2P(text, convertNumbersToWord=False, backMergeConjunction=True, singleOutputPerWord=True):
@@ -335,13 +336,13 @@ def KurdishG2P(text, convertNumbersToWord=False, backMergeConjunction=True, sing
     if convertNumbersToWord:
         text = Number2Word(text)
 
-    text = _G2PNormalize(text.strip())
+    text = G2P_normalize(text.strip())
 
     ku = "ئابپتجچحخدرڕزژسشعغفڤقکگلڵمنوۆەهیێ" + "ۋۉۊڎڴݵݸ"
     wordss = re.findall(f"([{ku}]+|[^{ku}]+)", text)
     for word in wordss:
         if re.search(f"[{ku}]", word) and word != "و":
-            sb.append(_WordG2P(re.sub(f"[^{ku}]+", "", word), singleOutputPerWord))
+            sb.append(word_G2P(re.sub(f"[^{ku}]+", "", word), singleOutputPerWord))
         else:
             sb.append(word)
     output = ''.join(sb)

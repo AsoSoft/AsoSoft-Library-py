@@ -18,9 +18,9 @@ import re
 from .G2P import KurdishG2P
 
 def ClassifyKurdishPoem(poem):
-    normalized = _PoemNormalization(poem)
-    syllabified = KurdishG2P(normalized, True, True, True).split('\n')
-    classified = _PoemClassification(syllabified)
+    normalized = poem_normalization(poem)
+    syllabified = KurdishG2P(normalized, convertNumbersToWord=True, backMergeConjunction=True, singleOutputPerWord=True).split('\n')
+    classified = poem_classification(syllabified)
     return classified
 
 class Pattern:
@@ -63,25 +63,25 @@ class ResultSet:
 
 CommonPatterns = []
 
-_path = os.path.dirname(__file__)
+path = os.path.dirname(__file__)
 
-def _loadPoemPatterns():
-    with open(os.path.join(_path, "resources/PoemPatterns.csv"), 'r', encoding="utf-8") as file:
+def load_poem_patterns():
+    with open(os.path.join(path, "resources/PoemPatterns.csv"), 'r', encoding="utf-8") as file:
         PoemPatterns = file.readlines()
     for i in range(1, len(PoemPatterns)):
-        item = PoemPatterns[i].split(',')
+        item = PoemPatterns[i].strip().split(',')
         CommonPatterns.append(Pattern())
         CommonPatterns[-1].freq = int(item[0])
         CommonPatterns[-1].weights = item[1]
         CommonPatterns[-1].title = item[2]
 
-_maxDist = 4
+max_dist = 4
 patternScores = [0] * 27
 
 # Classifies the input Kurdish poem
-def _PoemClassification(sHemistiches):
+def poem_classification(sHemistiches):
     if len(CommonPatterns) == 0:
-        _loadPoemPatterns()
+        load_poem_patterns()
     patternScores.clear()
     patternScores.extend([0] * 27)
     output = ResultSet()
@@ -99,11 +99,11 @@ def _PoemClassification(sHemistiches):
     #===== quantitative analysis
     AcceptableCandidates = []
     for i in range(len(sHemistiches)):
-        AcceptableCandidates.extend(_PatternMatch(_Convert2CV(sHemistiches[i]), i))
+        AcceptableCandidates.extend(pattern_match(convert_to_CV(sHemistiches[i]), i))
 
     highScore = patternScores.index(max(patternScores))
     output.quantitative = CommonPatterns[highScore].title
-    output.quantitativeConfidence = ((patternScores[highScore] / _maxDist) / HemistichesCount) * 100
+    output.quantitativeConfidence = ((patternScores[highScore] / max_dist) / HemistichesCount) * 100
 
     #===== final output for each hemistich
     final = []
@@ -116,7 +116,7 @@ def _PoemClassification(sHemistiches):
     output.details = final
 
     # ===== overal poem classification
-    stdDev = _CalculateStdDev(syllableCounts)
+    stdDev = calculate_standard_deviation(syllableCounts)
     metricalMargin = 40 if output.syllabic > 10 else 50
     stdDevMargin = output.syllabic / 10
     if stdDev > stdDevMargin:
@@ -132,7 +132,7 @@ def _PoemClassification(sHemistiches):
 
 # input: "ˈgerˈçî ˈtûˈşî ˈřenˈceˈřoˈyîw ˈḧesˈreˈtû ˈderˈdim ˈʔeˈmin "
 # output: List<"∪––––∪–––∪–––∪–", "∪––––∪–––∪––∪∪–">
-def _Convert2CV(syllabified):
+def convert_to_CV(syllabified):
     if len(syllabified) > 100: # abort if line is too long
         syllabified = " "
     CV = syllabified
@@ -165,18 +165,18 @@ def _Convert2CV(syllabified):
 
 # input: List of "∪–"s
 # output: List of nearests of 27 common meter patterns
-def _PatternMatch(cands, lineNumber):
+def pattern_match(cands, lineNumber):
     if len(CommonPatterns) == 0:
-        _loadPoemPatterns()
+        load_poem_patterns()
     output = []
     if cands[0].strip() != "":
         for i in range(len(CommonPatterns)): # for 27 common meter patterns
             distances = {}
             for j in range(len(cands)): # for each candidate
-                distances[j] = _Levenshtein(cands[j], CommonPatterns[i].weights)
+                distances[j] = dist_levenshtein(cands[j], CommonPatterns[i].weights)
             lowestDist = min(distances.values())
-            if lowestDist <= _maxDist:
-                patternScores[i] += _maxDist - lowestDist
+            if lowestDist <= max_dist:
+                patternScores[i] += max_dist - lowestDist
                 for item in [x for x in distances.items() if x[1] == lowestDist]:
                     output.append(ScannedHemistich())
                     output[-1].lineNo = lineNumber
@@ -187,22 +187,22 @@ def _PatternMatch(cands, lineNumber):
 
 # ==================================================
 # Normalizes the input text for classification steps.
-def _PoemNormalization(text: str) -> str:
+def poem_normalization(text: str) -> str:
     text = re.sub("ط", "ت", text)
     text = re.sub("[صث]", "س", text)
     text = re.sub("[ضذظ]", "ز", text)
     text = re.sub("( و)([.،؟!])", r"\1", text)
     return text
 
-def _CalculateStdDev(values) -> float:
-    ret = 0
+def calculate_standard_deviation(values) -> float:
+    standard_deviation = 0
     if len(values) > 0:
         avg = sum(values) / len(values)
-        Sum = sum((d - avg) ** 2 for d in values)
-        ret = (Sum / (len(values) - 1)) ** 0.5
-    return ret
+        squared_diff  = sum((d - avg) ** 2 for d in values)
+        standard_deviation = (squared_diff / len(values) ) ** 0.5
+    return standard_deviation
 
-def _Levenshtein(s1, s2):
+def dist_levenshtein(s1, s2):
     if not s1:
         if s2:
             return len(s2)

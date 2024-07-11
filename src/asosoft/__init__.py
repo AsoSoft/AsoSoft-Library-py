@@ -1,7 +1,7 @@
 __version__ = "0.1.0"
 
 from .Sort import (
-    kurdish_sort,
+    KurdishSort,
     CustomSort
 )
 
@@ -9,7 +9,7 @@ from .Number2Word import Number2Word
 
 from .Transliteration import (
     Ar2La,
-    Ar2LaF,
+    Ar2LaFeryad,
     Ar2LaSimple,
     La2Ar,
     LaDigraph2Ar,

@@ -44,7 +44,7 @@ gîrodey xałî řeşte; gwêt le neẍmey tuyûre?
 
 Arabic script into the Latin script suggested by Dr. Feryad Fazil Omar:
 ```python
->>> print(asosoft.Ar2LaF("گیرۆدەی خاڵی ڕەشتە؛ گوێت لە نەغمەی تویوورە؟"))
+>>> print(asosoft.Ar2LaFeryad("گیرۆدەی خاڵی ڕەشتە؛ گوێت لە نەغمەی تویوورە؟"))
 gîrodey xaḻî ṟeşte; gwêt le nex̱mey tuyûre?
 ```
 
@@ -144,7 +144,7 @@ Trim starting and ending white spaces (including zero width spaces) of line,
 ### Replace Html Entities
 `ReplaceHtmlEntity` replaces HTML Entities with single Unicode characters (e.g. "&eacute;" with "é"). It is useful in web crawled corpora.
 ```python
->>> print(asosoft.ReplaceHtmlEntity("ئێوە &quot;دەق&quot; لە زمانی &lt;کوردی&gt; دەنووسن"))
+>>> print(asosoft.ReplaceHtmlEntity("ئێوە &quot;دەق&quot; بە زمانی &lt;کوردی&gt; دەنووسن"))
 ئێوە "دەق" بە زمانی <کوردی> دەنووسن
 ```
 ### Replace URLs and emails
@@ -167,8 +167,7 @@ Trim starting and ending white spaces (including zero width spaces) of line,
 ### Word to Word Replacment
 `Word2WordReplacement` applies a "string to string" replacement dictionary on the text. It replaces the full-matched words not a part of them.
 ```python
->>> dict = {"مال": "ماڵ", "سلاو": "سڵاو"}
->>> print(asosoft.Word2WordReplacement("مال، نووری مالیکی", dict))
+>>> print(asosoft.Word2WordReplacement("مال، نووری مالیکی", {"مال": "ماڵ", "سلاو": "سڵاو"}))
 ماڵ، نووری مالیکی
 ```
 
@@ -193,13 +192,14 @@ Sorting a string list in correct order of Kurdish alphabet ("ئءاآأإبپت�
 ```python
 >>> myList = ["یەک", "ڕەنگ", "ئەو", "ئاو", "ڤەژین", "فڵان"]
 >>> print(asosoft.KurdishSort(myList))
-"ئاو", "ئەو", "ڕەنگ", "فڵان", "ڤەژین", "یەک"
+["ئاو", "ئەو", "ڕەنگ", "فڵان", "ڤەژین", "یەک"]
 ```
 or using your custom order:
 ```python
 >>> inputList = ["یەک", "ڕەنگ", "ئەو", "ئاو", "ڤەژین", "فڵان"]
->>> inputOrder = list(["ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ"])
+>>> inputOrder = list("ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ")
 >>> print(asosoft.CustomSort(inputList, inputOrder))
+["ئاو", "ئەو", "ڕەنگ", "فڵان", "ڤەژین", "یەک"]
 ```
 ## Poem Meter Classifier
 It classifies the meter of the input Kurdish poem typed in Arabic script. The lines of the poem should be seprated by new line char ('\n').
@@ -208,5 +208,7 @@ You can find Kurdish poems in https://books.vejin.net/.
 >>> poem = "گەرچی تووشی ڕەنجەڕۆیی و حەسرەت و دەردم ئەمن\nقەت لەدەس ئەم چەرخە سپڵە نابەزم مەردم ئەمن\nئاشقی چاوی کەژاڵ و گەردنی پڕ \nخاڵ نیم\nئاشقی کێو و تەلان و بەندەن و بەردم ئەمن"
 >>> classified = asosoft.ClassifyKurdishPoem(poem)
 >>> print("Poem Type= " + classified.overalMeterType)
+Quantitative/عەرووزی
 >>> print("Poem Meter= " + classified.overalPattern)
+فاعلاتن فاعلاتن فاعلاتن فاعلن
 ```

@@ -3,7 +3,7 @@ import re
 
 def Number2Word(text):
     # convert numbers to latin
-    text = _latinize_numbers(text)
+    text = latinize_numbers(text)
     # normalization steps
     text = re.sub("([0-9]{1,3})[,،](?=[0-9]{3})", r"\1", text)  # remove thousand separator 12,345,678 => 12345678
     text = re.sub("(?<![0-9])-([0-9]+)", r"ناقس \1", text)  # negative
@@ -14,14 +14,14 @@ def Number2Word(text):
     text = re.sub(r"€ ?([0-9]+(\.[0-9]+)?)", r"\1 یۆرۆ", text)  # € currency
 
     # convert float numbers
-    text = re.sub(r"([0-9]+)\.([0-9]+)", lambda m: _floatName(m.group(1), m.group(2)), text)
+    text = re.sub(r"([0-9]+)\.([0-9]+)", lambda m: float_name(m.group(1), m.group(2)), text)
 
     # convert remaining integer numbers
-    text = re.sub("([0-9]+)", lambda m: _integerName(m.group(1)), text)
+    text = re.sub("([0-9]+)", lambda m: integer_name(m.group(1)), text)
 
     return text
 
-_unifyNumbers = [
+unify_numbers = [
     r"٠|۰", "0",
     r"١|۱", "1",
     r"٢|۲", "2",
@@ -34,17 +34,17 @@ _unifyNumbers = [
     r"٩|۹", "9"
 ]
 
-def _latinize_numbers(text):
-    for i in range(0, len(_unifyNumbers), 2):
-        text = re.sub(_unifyNumbers[i], _unifyNumbers[i + 1], str(text))
+def latinize_numbers(text):
+    for i in range(0, len(unify_numbers), 2):
+        text = re.sub(unify_numbers[i], unify_numbers[i + 1], str(text))
     return text
 
-def _floatName(integerPart, decimalPart):
+def float_name(integerPart, decimalPart):
     point = " پۆینت " + re.sub("((?<=0)0|^0)", " سفر ", decimalPart)
     point = re.sub("[0-9]", "", point)
-    return _integerName(integerPart) + point + _integerName(decimalPart)
+    return integer_name(integerPart) + point + integer_name(decimalPart)
 
-def _integerName(inputInteger):
+def integer_name(inputInteger):
     output = ""
     if inputInteger != "0":
         ones = ["", "یەک", "دوو", "سێ", "چوار", "پێنج", "شەش", "حەوت", "هەشت", "نۆ"]

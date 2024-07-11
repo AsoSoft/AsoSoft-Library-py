@@ -1,4 +1,4 @@
-def kurdish_sort(inputList):
+def KurdishSort(inputList):
     ku = list("ئءاآأإبپتثجچحخدڎڊذرڕزژسشصضطظعغفڤقكکگڴلڵمنوۆۊۉۋهھەیێ")
     return CustomSort(inputList, ku)
 
